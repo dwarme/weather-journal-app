@@ -1,10 +1,12 @@
+import API from "./api";
 /* Global Variables */
 
 const API_KEY_OPEN_WEATHERMAP = '0a6f3c93694897d03df8bd5af22ad641';
 
-const zipInput = document.getElementById('zip');
-const feelingsInput = document.getElementById('feelings');
-const btnGenerate = document.getElementById('generate');
+const zipInput = /** @type {HTMLInputElement} */ (document.getElementById('zip'));
+const feelingsInput = /** @type {HTMLTextAreaElement} */ (document.getElementById('feelings'));
+const btnGenerate = /** @type {HTMLButtonElement} */ (document.getElementById('generate'));
+const loadingMessageContainer = /** @type {HTMLDivElement} */ (document.getElementById('loadingMessageCtn'));
 
 let zip = '';
 let feelings = '';
@@ -33,20 +35,59 @@ function debounce(fn, wait) {
     };
 }
 
-async function fetchWeatherData() {
 
+function setLoading(loading) {
+    if(loading) {
+        loadingMessageContainer.classList.add('show');
+        return;
+    }
+
+    loadingMessageContainer.classList.remove('show');
+}
+
+function disableBtnGenerate() {
+    btnGenerate.disabled = true;
+}
+
+function activeBtnGenerate() {
+    btnGenerate.disabled = false;
+}
+
+function checkValidity() {
+    if(Boolean(zip) && Boolean(feelings)) {
+        activeBtnGenerate();
+        return;
+    }
+
+    disableBtnGenerate();
 }
 
 function handleZipInput() {
-    
+    zip = zipInput.value.trim();
+    checkValidity();
 }
 
 function handleFeelingsInput() {
-
+    feelings = feelingsInput.value.trim();
+    checkValidity();
 }
 
-function handleBtnGenerateClick() {
+async function handleBtnGenerateClick() {
+    disableBtnGenerate();
+    setLoading(true);
 
+    try {
+
+        const resultWeather = await API.weather.data();
+        const resultFeedback = await API.userFeedback.add();
+        
+    }catch(error){
+        console.log(error);
+        alert('An error occured');
+    }finally {
+        activeBtnGenerate();
+        setLoading(false);
+    }
 }
 
 const debounceZipInput = debounce(handleZipInput, 300);
@@ -54,4 +95,5 @@ const debounceFeelingsInput = debounce(handleFeelingsInput);
 
 zipInput.addEventListener('change', debounceZipInput);
 feelingsInput.addEventListener('change', debounceFeelingsInput);
+btnGenerate.addEventListener('click', handleBtnGenerateClick);
 
