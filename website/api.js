@@ -36,7 +36,7 @@ const API = {
         data: weatherDataFetch
     },
     userFeedback: {
-        list: userFeedbackAll,
+        all: userFeedbackAll,
         add: userFeedbackAdd
     }
 }

@@ -42,7 +42,7 @@ function debounce(func, wait) {
 
 async function showLastFeebback() {
     try {
-        const feedbacks = await API.userFeedback.list();
+        const feedbacks = await API.userFeedback.all();
         const feedbacksKey = Object.keys(feedbacks);
         if(feedbacksKey.length === 0) return;
 
