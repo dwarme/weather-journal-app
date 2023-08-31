@@ -31,7 +31,6 @@ async function userFeedbackAdd({date, temp, feelings}) {
     }
 }
 
-
 const API = {
     weather: {
         data: weatherDataFetch
