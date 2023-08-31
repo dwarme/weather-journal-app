@@ -2,7 +2,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors')
 const UUI = require('uuid').v4
 // Setup empty JS object to act as endpoint for all routes
-projectData = {};
+const projectData = {};
 
 const PORT = 4002;
 // Require Express to run server and routes
@@ -21,17 +21,17 @@ app.use(cors())
 // Initialize the main project folder
 app.use(express.static('website'));
 
-app.get('/all', (req, res) => {
-    // returns the projectData object 
+app.get('/all', (_, res) => {
     res.json(projectData)
 })
 
 app.post('/add', (req, res)=>{
-    // Adds incoming data to projectData
-    const {date, temperature, feelings} = req.body;
+    const {date, temp, feelings} = req.body;
     const KEY = UUI()
-    projectData[KEY] = {date, temperature, feelings};
-    res.status(201).json({...projectData[KEY]}) 
+    projectData[KEY] = {date, temp, feelings};
+
+    console.log(projectData);
+    res.status(201).send('Created');
 })
 
 // Setup Server

@@ -1,28 +1,33 @@
-import API from "./api";
+import API from "./api.js";
 /* Global Variables */
 
-const API_KEY_OPEN_WEATHERMAP = '0a6f3c93694897d03df8bd5af22ad641';
+// Personal API Key for OpenWeatherMap API
+const COUNTRY_OPENWEARTHER = 'US'
+const API_KEY_OPENWEATHER = `0a6f3c93694897d03df8bd5af22ad641&units=imperial`;
+const API_URL_OPENWEATHER = 'https://api.openweathermap.org/data/2.5/weather';
 
 const zipInput = /** @type {HTMLInputElement} */ (document.getElementById('zip'));
 const feelingsInput = /** @type {HTMLTextAreaElement} */ (document.getElementById('feelings'));
 const btnGenerate = /** @type {HTMLButtonElement} */ (document.getElementById('generate'));
-const loadingMessageContainer = /** @type {HTMLDivElement} */ (document.getElementById('loadingMessageCtn'));
 
 let zip = '';
 let feelings = '';
 
 // Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = d.getMonth()+'.'+ d.getDate()+'.'+ d.getFullYear();
+function getCurrentDate() {
+    let d = new Date();
+    let newDate = d.getMonth()+'.'+ d.getDate()+'.'+ d.getFullYear();
+    return newDate;
+}
 
 /**
  * Creates a debounced version of a function that will delay its execution until after a specified amount of time has passed since the last call.
  * 
- * @param {Function} fn - The function to debounce.
+ * @param {Function} func - The function to debounce.
  * @param {number} wait - The number of milliseconds to wait before executing the debounced function.
  * @returns {Function} The debounced function.
  */
-function debounce(fn, wait) {
+function debounce(func, wait) {
     let timeout;
 
     // Return the debounced function
@@ -31,18 +36,46 @@ function debounce(fn, wait) {
         clearTimeout(timeout);
 
         // Set a new timeout to execute the function after the specified wait time
-        timeout = setTimeout(() => fn.apply(this, args), wait);
+        timeout = setTimeout(() => func.apply(this, args), wait);
     };
 }
 
+async function showLastFeebback() {
+    try {
+        const feedbacks = await API.userFeedback.list();
+        const feedbacksKey = Object.keys(feedbacks);
+        if(feedbacksKey.length === 0) return;
+
+        const lastFeedbackKey = feedbacksKey[ feedbacksKey.length - 1 ];
+        const lastFeedback = feedbacks[lastFeedbackKey];
+
+        // Write updated data to DOM elements
+        document.getElementById('temp').innerHTML = Math.round(lastFeedback.temp)+ ' degrees';
+        document.getElementById('content').innerHTML = lastFeedback.feelings;
+        document.getElementById('date').innerHTML =lastFeedback.date;
+
+    }catch(error){
+        console.warn(error)
+    }
+}
+
+function cleanInputs() {
+    disableBtnGenerate();
+
+    zipInput.value = '';
+    zip = '';
+
+    feelingsInput.value = '';
+    feelings = '';
+}
 
 function setLoading(loading) {
     if(loading) {
-        loadingMessageContainer.classList.add('show');
+        btnGenerate.innerHTML = 'Loading ...';
         return;
     }
 
-    loadingMessageContainer.classList.remove('show');
+    btnGenerate.innerHTML = 'Generate';
 }
 
 function disableBtnGenerate() {
@@ -78,12 +111,21 @@ async function handleBtnGenerateClick() {
 
     try {
 
-        const resultWeather = await API.weather.data();
-        const resultFeedback = await API.userFeedback.add();
-        
+        const API_QUERY_OPENWEARTH = `?zip=${zip},${COUNTRY_OPENWEARTHER}&appid=${API_KEY_OPENWEATHER}`
+        const resultWeather = await API.weather.data(API_URL_OPENWEATHER + API_QUERY_OPENWEARTH);
+
+        const {temp} = resultWeather.main;
+        const date = getCurrentDate();
+
+        await API.userFeedback.add({date, temp, feelings});
+
+        cleanInputs();
+        showLastFeebback();
+
     }catch(error){
-        console.log(error);
+        console.warn(error);
         alert('An error occured');
+
     }finally {
         activeBtnGenerate();
         setLoading(false);
@@ -96,4 +138,6 @@ const debounceFeelingsInput = debounce(handleFeelingsInput);
 zipInput.addEventListener('change', debounceZipInput);
 feelingsInput.addEventListener('change', debounceFeelingsInput);
 btnGenerate.addEventListener('click', handleBtnGenerateClick);
+
+showLastFeebback();
 

@@ -109,11 +109,3 @@ button:focus {
     font-family: 'Oswald', sans-serif;
 
 } 
-
-.loading-message-container {
-    display: none;
-}
-
-.loading-message-container.show {
-    display: block;
-}
