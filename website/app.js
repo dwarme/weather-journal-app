@@ -40,7 +40,7 @@ function debounce(func, wait) {
     };
 }
 
-async function showLastFeebback() {
+async function showLastFeedback() {
     try {
         const feedbacks = await API.userFeedback.all();
         const feedbacksKey = Object.keys(feedbacks);
@@ -120,7 +120,7 @@ async function handleBtnGenerateClick() {
         await API.userFeedback.add({date, temp, feelings});
 
         cleanInputs();
-        showLastFeebback();
+        showLastFeedback();
 
     }catch(error){
         console.warn(error);
@@ -139,5 +139,5 @@ zipInput.addEventListener('change', debounceZipInput);
 feelingsInput.addEventListener('change', debounceFeelingsInput);
 btnGenerate.addEventListener('click', handleBtnGenerateClick);
 
-showLastFeebback();
+showLastFeedback();
 
