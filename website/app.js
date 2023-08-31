@@ -133,7 +133,7 @@ async function handleBtnGenerateClick() {
 }
 
 const debounceZipInput = debounce(handleZipInput, 300);
-const debounceFeelingsInput = debounce(handleFeelingsInput);
+const debounceFeelingsInput = debounce(handleFeelingsInput, 300);
 
 zipInput.addEventListener('change', debounceZipInput);
 feelingsInput.addEventListener('change', debounceFeelingsInput);
